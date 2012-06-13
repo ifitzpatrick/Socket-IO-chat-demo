@@ -12,7 +12,8 @@ html(ng-app="chat")
       | Enter your message:
       input(ng-model="newMessage", press-enter="sendMessage(newMessage)")
       button(ng-click="sendMessage(newMessage)") Send Message
-    div(ng-repeat="message in messages") {{message}}
+    div(ng-repeat="message in messages")
+      span(ng-bind="message")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
     script(src="/js/angular.js")
     script(src="/socket.io/socket.io.js")
