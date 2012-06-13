@@ -1,6 +1,6 @@
 express  = require 'express'
 socketio = require 'socket.io'
-sealdeal = require '../sealdeal'
+sealdeal = require 'sealdeal'
 
 app = express.createServer()
 
