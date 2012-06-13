@@ -1,0 +1,19 @@
+doctype 5
+
+html(ng-app="chat")
+  head
+    title Socket.io Test
+
+  body(ng-controller="mainCtrl")
+    div
+      | Enter your name:
+      input(ng-model="user")
+    div
+      | Enter your message:
+      input(ng-model="newMessage", key-down="sendMessage", key="13")
+      button(ng-click="sendMessage(newMessage)") Send Message
+    div(ng-repeat="message in messages") {{message}}
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
+    script(src="/js/angular.js")
+    script(src="/socket.io/socket.io.js")
+    script(src="/js/app.js")
