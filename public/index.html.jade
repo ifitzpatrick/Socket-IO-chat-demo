@@ -5,6 +5,7 @@ html(ng-app="chat")
     title Socket.io Test
 
   body(ng-controller="mainCtrl")
+    div(ng-bind="connectionMessage()")
     div
       | Enter your name:
       input(ng-model="user")

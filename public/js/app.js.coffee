@@ -3,6 +3,7 @@ angular.module('chat', [])
          $scope.messages = []
          $scope.newMessage = ''
          $scope.user = ''
+         $scope.isConnected = false
          $scope.addMessage = (message) ->
            $scope.messages.push message
 
@@ -10,12 +11,23 @@ angular.module('chat', [])
          $scope.formatMessage = (message) ->
            if $scope.user.length then "#{$scope.user}: #{message}" else message
 
-         chatMessenger = new Messenger '/', $scope, (msg) ->
-           $scope.addMessage msg
+         chatMessenger = new Messenger
+           route: '/'
+           scope: $scope
+           onMessage: (msg) ->
+             $scope.addMessage msg
+           onConnect: ->
+             $scope.isConnected = true
 
          $scope.sendMessage = (message) ->
            $scope.newMessage = ''
            chatMessenger.sendMessage $scope.formatMessage message
+
+         $scope.connectionMessage = ->
+           if $scope.isConnected
+             "Connected"
+           else "Connecting..."
+
 
        ).directive('pressEnter', ->
          (scope, element, attrs) ->
@@ -26,18 +38,23 @@ angular.module('chat', [])
        ).factory('io', -> io
        ).factory('Messenger', (io) ->
          class
-           constructor: (route, scope, receiveMessage = ->) ->
-             @socket = io.connect route
-             @scope = scope
+           constructor: (props) ->
+             @socket = io.connect props.route
+             @scope = props.scope
 
              @socket.on 'connect', =>
                @isConnected = true
+               if props.onConnect?
+                 @scope.$apply ->
+                   props.onConnect()
+
                for message in @queue
                  @sendMessage message
 
-               @socket.on 'message', (msg) =>
-                 @scope.$apply ->
-                   receiveMessage msg
+               if props.onMessage?
+                 @socket.on 'message', (msg) =>
+                   @scope.$apply ->
+                     props.onMessage msg
 
            queue: []
            isConnected: false
