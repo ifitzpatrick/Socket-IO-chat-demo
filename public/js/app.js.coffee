@@ -1,35 +1,49 @@
 angular.module('chat', [])
-       .controller('mainCtrl', ($scope, io) ->
+       .controller('mainCtrl', ($scope, Messenger) ->
          $scope.messages = []
          $scope.newMessage = ''
          $scope.user = ''
          $scope.addMessage = (message) ->
+           $scope.newMessage = ''
            $scope.messages.push message
 
          queue = []
          $scope.formatMessage = (message) ->
            if $scope.user.length then "#{$scope.user}: #{message}" else message
+
+         chatMessenger = new Messenger '/', $scope, (msg) ->
+           $scope.addMessage msg
+
          $scope.sendMessage = (message) ->
-           queue.push $scope.formatMessage message
+           chatMessenger.sendMessage $scope.formatMessage message
 
-         socket = io.connect '/'
-         socket.on 'connect', ->
-           $scope.$apply ->
-             $scope.sendMessage = (message) ->
-               socket.send $scope.formatMessage message
-
-           for message in queue
-             socket.send message
-
-           socket.on 'message', (msg) ->
-             $scope.$apply ->
-               $scope.addMessage msg
-       ).directive('keyDown', ->
+       ).directive('pressEnter', ->
          (scope, element, attrs) ->
            element.keydown (evt) ->
-             if evt.which is +attrs['key'] or not attrs['key']
-               scope.$apply (scope) ->
-                 scope[attrs['keyDown']](element.val())
+             if evt.which is 13
+               scope.$apply attrs['pressEnter']
 
-               element.val ''
-       ).factory('io', -> io)
+       ).factory('io', -> io
+       ).factory('Messenger', (io) ->
+         class
+           constructor: (route, scope, receiveMessage = ->) ->
+             @socket = io.connect route
+             @scope = scope
+
+             @socket.on 'connect', =>
+               @isConnected = true
+               for message in @queue
+                 @sendMessage message
+
+               @socket.on 'message', (msg) =>
+                 @scope.$apply ->
+                   receiveMessage msg
+
+           queue: []
+           isConnected: false
+           sendMessage: (msg) ->
+             if @isConnected
+               @socket.send msg
+             else @queue.push msg
+       )
+
