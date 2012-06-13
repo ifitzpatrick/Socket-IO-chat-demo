@@ -28,7 +28,7 @@ app.get '/', (req, res, next) ->
   req.params[0] = "/index.html"
   preprocessor req, res, next
 
-app.listen 5000
+app.listen process.env.PORT or 5000
 io = socketio.listen app
 
 chat = io.on 'connection', (socket) ->
