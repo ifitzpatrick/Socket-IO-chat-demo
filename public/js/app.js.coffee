@@ -4,7 +4,6 @@ angular.module('chat', [])
          $scope.newMessage = ''
          $scope.user = ''
          $scope.addMessage = (message) ->
-           $scope.newMessage = ''
            $scope.messages.push message
 
          queue = []
@@ -15,6 +14,7 @@ angular.module('chat', [])
            $scope.addMessage msg
 
          $scope.sendMessage = (message) ->
+           $scope.newMessage = ''
            chatMessenger.sendMessage $scope.formatMessage message
 
        ).directive('pressEnter', ->
